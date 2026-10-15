@@ -31,7 +31,7 @@ Servidor MCP **local** para buscar y leer la **Jurisprudencia Nacional Sistemati
 
 ### Opción A — Un click (sin terminal)
 
-1. Descarga el bundle **`juris-pj-mcp-0.2.5.mcpb`** (carpeta `dist/` de este repo, o el Release si existe).
+1. Descarga **`juris-pj-mcp.mcpb`** desde [Releases](https://github.com/pipaacebedo/juris-pj-mcp/releases/latest) (asset con nombre fijo: siempre es el mismo archivo, actualizado a la última versión).
 2. Abre Claude Desktop → **Ajustes → Extensiones → Instalar desde archivo**.
 3. Selecciona el `.mcpb` y listo.
 
@@ -76,9 +76,8 @@ El servidor envía sus instrucciones de uso por el handshake MCP: el agente sabe
 
 ## Actualizaciones
 
-- El servidor se AUTO-CHEQUEA en cada arranque contra [Releases](https://github.com/pipaacebedo/juris-pj-mcp/releases/latest): si publicamos una versión más nueva que la tuya, el handshake informa `UPDATE DISPONIBLE` y tu agente te indicará descargar el `.mcpb` nuevo y re-instalarlo (arrastrar de nuevo; desactívalo con `PJ_UPDATE_CHECK=0`).
-- Los que ya instalaron NO se actualizan solos por arte de magia (el formato MCPB no trae canal push): el aviso del handshake + esta URL fija es el canal completo.
-- Descarga SIEMPRE la última versión desde la URL flotante: **[juris-pj-mcp.mcpb](https://github.com/pipaacebedo/juris-pj-mcp/releases/download/latest/juris-pj-mcp.mcpb)** (se re-publica en cada release).
+- El servidor se auto-chequea en cada arranque: si publicamos una versión más nueva que la tuya, tu agente verá el aviso `UPDATE DISPONIBLE` y te pedirá descargar `juris-pj-mcp.mcpb` de [Releases](https://github.com/pipaacebedo/juris-pj-mcp/releases/latest) e instalarlo de nuevo (arrástralo como la primera vez). Se desactiva con `PJ_UPDATE_CHECK=0`.
+- Cada versión reemplaza el mismo archivo (`juris-pj-mcp.mcpb`): la página de Releases siempre muestra una sola tarjeta con la última.
 
 ## Tools
 
