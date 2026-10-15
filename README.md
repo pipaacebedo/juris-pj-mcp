@@ -74,6 +74,12 @@ Y añade a la configuración de servidores MCP de tu agente:
 
 El servidor envía sus instrucciones de uso por el handshake MCP: el agente sabe cómo buscar y leer sin prompts adicionales.
 
+## Actualizaciones
+
+- El servidor se AUTO-CHEQUEA en cada arranque contra [Releases](https://github.com/pipaacebedo/juris-pj-mcp/releases/latest): si publicamos una versión más nueva que la tuya, el handshake informa `UPDATE DISPONIBLE` y tu agente te indicará descargar el `.mcpb` nuevo y re-instalarlo (arrastrar de nuevo; desactívalo con `PJ_UPDATE_CHECK=0`).
+- Los que ya instalaron NO se actualizan solos por arte de magia (el formato MCPB no trae canal push): el aviso del handshake + esta URL fija es el canal completo.
+- Descarga SIEMPRE la última versión desde la URL flotante: **[juris-pj-mcp.mcpb](https://github.com/pipaacebedo/juris-pj-mcp/releases/download/latest/juris-pj-mcp.mcpb)** (se re-publica en cada release).
+
 ## Tools
 
 | Tool | Qué hace |

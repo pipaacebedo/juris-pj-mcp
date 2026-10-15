@@ -10,16 +10,21 @@ Proyecto NO oficial, sin afiliacion con el Poder Judicial ni el Estado peruano.
 import asyncio
 import base64
 import html as html_mod
+import json
+import logging
 import os
 import re
 import time
 import unicodedata
 import uuid
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
 
 import httpx
 from mcp.server.fastmcp import FastMCP
+
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 BASE = "https://jurisprudencia.pj.gob.pe"
 APP = BASE + "/jurisprudenciaweb"
@@ -124,6 +129,44 @@ EVALUADOS = ("1", "true", "si", "s", "on", "yes")
 
 ALIAS_TODOS = ("todos", "todo", "-- todos --", "all", "0")
 
+_REPO_GITHUB = "pipaacebedo/juris-pj-mcp"
+_VERSION = "0.0.0"
+try:
+    _VERSION = str(json.loads(Path(__file__).resolve().parent.joinpath("manifest.json").read_text(encoding="utf-8")).get("version", _VERSION))
+except Exception:
+    pass
+
+
+def _semver_mayor(remota: str, instalada: str) -> bool:
+    def partes(v: str) -> list[int]:
+        return [int(x) for x in re.findall(r"\d+", v)[:3]] or [0]
+
+    return partes(remota) > partes(instalada)
+
+
+def _update_remota() -> str:
+    """tag semver de un release mas nuevo que el instalado; '' si no hay, si esta desactivado (PJ_UPDATE_CHECK=0) o si el chequeo falla (NUNCA lanza)."""
+    if os.getenv("PJ_UPDATE_CHECK", "1").strip() in ("0", "false", "no"):
+        return ""
+    try:
+        r = httpx.get(f"https://api.github.com/repos/{_REPO_GITHUB}/releases?per_page=5", headers={"Accept": "application/vnd.github+json", "User-Agent": "juris-pj-mcp"}, timeout=3.0)
+        for rel in (r.json() or []):
+            tag = str(rel.get("tag_name", ""))
+            if re.fullmatch(r"v?\d+\.\d+(\.\d+)?", tag) and _semver_mayor(tag, _VERSION):
+                return tag.lstrip("v")
+        return ""
+    except Exception:
+        return ""
+
+
+def _linea_update() -> str:
+    """parrafo UPDATE DISPONIBLE para las INSTRUCCIONES; '' si no hay version mas nueva."""
+    remota = _update_remota()
+    if not remota:
+        return ""
+    return f"UPDATE DISPONIBLE - existe la version v{remota} (instalada v{_VERSION}): pide al usuario descargar el .mcpb nuevo y reinstalarlo (https://github.com/{_REPO_GITHUB}/releases/latest); el estado de sesion del sitio no se traslada entre versiones.\n"
+
+
 INSTRUCCIONES = (
     "Servidor de la JURISPRUDENCIA NACIONAL SISTEMATIZADA del Poder Judicial peruano (resoluciones sistematizadas por el PJ: casaciones, apelaciones, ejecutorias supremas, autos, sentencias de vista y laudos). Lee en 3 niveles:\n"
     "0 DESCUBRIR - buscar_resoluciones(texto='...') o con filtros: nivel ('Corte Suprema' default / 'Corte Superior' + distrito + especialidad del distrito + sala EXACTA via listar_salas), pretension y palabra_clave (valores EXACTOS via los autocompletes), expediente, tipo_recurso/tipo_resolucion, anio, ncpp/nlpt (con especialidad Penal/Laboral), autos y orden/forma. Cada llamada trae 'ses', filas con 'index' GLOBAL (0-based y continuo entre paginas), 'total' y 'paginas'. La SUMILLA viene COMPLETA (sin truncar: es el texto de la decision).\n"
@@ -133,6 +176,8 @@ INSTRUCCIONES = (
     "RENDIMIENTO REAL: el sitio es LENTO (aterrizaje 9-18 s; POST de filtros 2-8 s; cada pagina paginada 8-12 s; PDF 4-17 s). El sitio SIRVE SIEMPRE 10 filas por pagina y 'paginas' (1..6) trae paginas consecutivas en UNA llamada: prefiere 1 llamada con paginas=3..6 a muchas llamadas de 1 pagina. Catalogos: listar_filtros (todas las listas) y listar_salas (~15-35 s la primera vez, cache 30 min). Toda tool responde dentro de PJ_TOOL_TIMEOUT (300 s): si el sitio congela el socket, la llamada vuelve con error y pista, nunca cuelga.\n"
     "Politica de sesion: 'ses' GLOBAL compartido por las tools de la MISMA busqueda, TTL de 15 min DESLIZANTE desde la ultima actividad, eliminacion LRU. Cambio de filtros con el mismo 'ses' re-ejecuta la busqueda conservando el id; un 'ses' desconocido (vencido) junto con filtros lanza una busqueda NUEVA con id nuevo y lo declara en la 'nota'. 'ses' vencido con pagina>1 -> error 'sesion expirada o no encontrada': repite la busqueda. Si la respuesta trae 'error', usa la 'pista' y repite.\n"
 )
+
+INSTRUCCIONES += _linea_update()
 
 mcp = FastMCP("Jurisprudencia Nacional Sistematizada (No oficial)", instructions=INSTRUCCIONES, stateless_http=True)
 
