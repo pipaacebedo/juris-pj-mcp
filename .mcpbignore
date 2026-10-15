@@ -1,0 +1,15 @@
+.venv
+venv
+__pycache__
+*.py[cod]
+.scripts
+dist
+build
+.env
+.env.*
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+*.log
+.ruff.toml

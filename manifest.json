@@ -1,0 +1,89 @@
+{
+  "manifest_version": "0.4",
+  "name": "juris-pj-mcp",
+  "display_name": "Jurisprudencia Nacional Sistematizada (No oficial)",
+  "version": "0.2.5",
+  "description": "MCP local para buscar en la Jurisprudencia Nacional Sistematizada del Poder Judicial del Peru (jurisprudencia.pj.gob.pe). No oficial.",
+  "long_description": "Servidor MCP local para la Jurisprudencia Nacional Sistematizada del Poder Judicial del Peru. 10 tools punta a punta: busqueda de resoluciones con todos los filtros del buscador publico (texto; nivel Suprema/Superior con distrito y sala dependientes via listar_salas; especialidad, pretension y palabras clave con autocomplete propio; expediente; tipo de recurso y de resolucion; anio; NCPP/NLPT; autos; orden y forma) con paginacion de indices globales continuos y sesiones LRU (TTL 15 min deslizante). Buscador de anulacion y ejecucion de laudos arbitrales con orden/forma honrados. Fichas/resumenes con SUMILLA COMPLETA (nunca truncada: es el texto de la decision), palabras clave, sala suprema y norma de derecho interno cuando el sitio las publica. URL publica de descarga del PDF de cada resolucion; exportacion de la busqueda a Excel (XLS base64 con cap declarado y NUNCA truncamiento silencioso). Watchdog por llamada: toda tool responde (o devuelve error con pista en espanol) dentro de PJ_TOOL_TIMEOUT; cada respuesta incluye 'ms' (latencia real del server). Validaciones estrictas de orden/forma contra el catalogo (las etiquetas del catalogo funcionan: 'Nro de Recurso' == codigo '0') y de sala contra el combo del distrito (sala invalida => error con ejemplos, jamas filtrado silencioso). El servidor nunca guarda archivos. Proyecto NO oficial, Apache-2.0.",
+  "author": {
+    "name": "pipaacebedo",
+    "url": "https://github.com/pipaacebedo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pipaacebedo/juris-pj-mcp.git"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "peru",
+    "jurisprudencia",
+    "poder-judicial",
+    "resoluciones",
+    "casaciones",
+    "laudos",
+    "legal",
+    "mcp"
+  ],
+  "server": {
+    "type": "uv",
+    "entry_point": "server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "server.py"
+      ]
+    }
+  },
+  "tools": [
+    {
+      "name": "buscar_resoluciones",
+      "description": "Busca resoluciones del PJ con filtros (texto, nivel, distrito+sala, especialidad, pretension, palabras clave, expediente, tipo de recurso/resolucion, anio, NCPP/NLPT, autos, orden) con sumilla COMPLETA y paginacion por indices globales"
+    },
+    {
+      "name": "buscar_laudos",
+      "description": "Buscador de anulacion y ejecucion de laudos arbitrales con texto, anio, expediente, palabra clave y orden/forma honrados"
+    },
+    {
+      "name": "ficha_resolucion",
+      "description": "Ficha/resumen de una resolucion por index (recurso, expediente, sala suprema u organo, sumilla COMPLETA, palabras clave, norma de derecho interno y url_pdf)"
+    },
+    {
+      "name": "fichas_resoluciones",
+      "description": "Lote de fichas/resumenes de la misma busqueda en una llamada (cap 50)"
+    },
+    {
+      "name": "url_resolucion",
+      "description": "URL publica de descarga del PDF de una resolucion por uuid (valida formato local)"
+    },
+    {
+      "name": "exportar_excel",
+      "description": "Exporta la busqueda entera a XLS en base64 con cap declarado; si supera el cap devuelve el tamano y la pista, NUNCA trunca"
+    },
+    {
+      "name": "buscar_pretensiones",
+      "description": "Sugerencias del autocomplete de Pretension/Delito del buscador (valores EXACTOS)"
+    },
+    {
+      "name": "buscar_palabras_clave",
+      "description": "Sugerencias del autocomplete de Palabras Clave del buscador (valores EXACTOS)"
+    },
+    {
+      "name": "listar_salas",
+      "description": "Organos jurisdiccionales (salas) de un distrito y especialidad de corte superior (cache 30 min)"
+    },
+    {
+      "name": "listar_filtros",
+      "description": "Valores exactos para los filtros: nivel, distritos, especialidades, tipos_recurso, tipos_resolucion, anios y orden"
+    }
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ]
+  }
+}
